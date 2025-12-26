@@ -9,7 +9,7 @@ data class FixedDeposit(
     val interestRate: Double,
     val startDate: Long,
     val maturityDate: Long,
-    val interestPayoutFreq: PayoutFrequency,
+    val payoutFrequency: PayoutFrequency,
     val createdAt: Long,
     val updatedAt: Long,
     val createdBy: String

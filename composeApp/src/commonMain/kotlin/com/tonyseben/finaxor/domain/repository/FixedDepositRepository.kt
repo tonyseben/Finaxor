@@ -1,5 +1,6 @@
 package com.tonyseben.finaxor.domain.repository
 
+import com.tonyseben.finaxor.core.Result
 import com.tonyseben.finaxor.domain.model.FixedDeposit
 import com.tonyseben.finaxor.domain.model.PayoutFrequency
 import kotlinx.coroutines.flow.Flow

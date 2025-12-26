@@ -1,5 +1,6 @@
 package com.tonyseben.finaxor.domain.repository
 
+import com.tonyseben.finaxor.core.Result
 import com.tonyseben.finaxor.domain.model.Portfolio
 import com.tonyseben.finaxor.domain.model.PortfolioRole
 import com.tonyseben.finaxor.domain.model.User
