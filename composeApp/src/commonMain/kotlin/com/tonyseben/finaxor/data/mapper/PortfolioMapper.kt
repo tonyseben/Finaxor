@@ -5,6 +5,7 @@ import com.tonyseben.finaxor.data.entity.PortfolioMemberEntity
 import com.tonyseben.finaxor.domain.model.Portfolio
 import com.tonyseben.finaxor.domain.model.PortfolioMember
 import com.tonyseben.finaxor.domain.model.PortfolioRole
+import kotlin.jvm.JvmName
 
 fun PortfolioEntity.toDomain(): Portfolio {
     return Portfolio(
@@ -64,5 +65,8 @@ fun PortfolioRole.toRoleString(): String {
 }
 
 
+@JvmName("portfoliosToDomain")
 fun List<PortfolioEntity>.toDomain(): List<Portfolio> = map { it.toDomain() }
+
+@JvmName("membersToDomain")
 fun List<PortfolioMemberEntity>.toDomain(): List<PortfolioMember> = map { it.toDomain() }
