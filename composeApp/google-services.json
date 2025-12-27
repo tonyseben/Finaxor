@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "224677711174",
+    "project_id": "finaxor",
+    "storage_bucket": "finaxor.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224677711174:android:6b3d1486a32ab6cec0a947",
+        "android_client_info": {
+          "package_name": "com.tonyseben.finaxor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "224677711174-6d18u6rf3s4l1amh0i2jbqs7vkphhj3l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tonyseben.finaxor",
+            "certificate_hash": "e7631d7fa732beed7e87ec73bebafdfcf71aabdd"
+          }
+        },
+        {
+          "client_id": "224677711174-tahgk878ocdhs7d6n4hpplkm2erdadhm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQAo74jj3wElsUCOUMmCJRNahpMxNxCUU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224677711174-tahgk878ocdhs7d6n4hpplkm2erdadhm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
