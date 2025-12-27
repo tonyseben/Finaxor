@@ -16,7 +16,6 @@ plugins {
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
@@ -33,22 +32,6 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
-        }
-    }
-
-    cocoapods {
-        summary = "Finaxor Compose Multiplatform App"
-        homepage = "https://github.com/tonyseben/finaxor"
-        version = "1.0"
-        ios.deploymentTarget = "15.0"
-        podfile = project.file("../iosApp/Podfile")
-        framework {
-            baseName = "ComposeApp"
-            isStatic = true
-        }
-
-        pod("GoogleSignIn") {
-            version = "~> 7.0"
         }
     }
 
