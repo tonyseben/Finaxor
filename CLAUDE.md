@@ -10,9 +10,6 @@ repository.
 ./gradlew :composeApp:assembleDebug     # Build debug APK
 ./gradlew :composeApp:assembleRelease   # Build release APK
 
-# Desktop (JVM)
-./gradlew :composeApp:run               # Run desktop app
-
 # iOS - Use Xcode with iosApp/iosApp.xcodeproj
 
 # Testing
@@ -23,7 +20,7 @@ repository.
 ## Architecture Overview
 
 Finaxor is a **Kotlin Multiplatform (KMP)** app for managing investment portfolios and fixed
-deposits, targeting Android, iOS, and Desktop using Compose Multiplatform.
+deposits, targeting Android and iOS using Compose Multiplatform.
 
 ### Clean Architecture Layers
 
@@ -74,7 +71,7 @@ composeApp/src/commonMain/kotlin/com/tonyseben/finaxor/
 - **Firebase (GitLive KMP)**: 2.1.0 (firebase-auth, firebase-firestore)
 - **Kotlinx**: Serialization 1.8.0, DateTime 0.6.1, Coroutines 1.10.2
 - **Android**: minSdk 24, targetSdk 36, compileSdk 35, JVM 11
-- **Google Sign-In**: Credential Manager API (Android), GIDSignIn (iOS)
+- **Google Sign-In**: Credential Manager API (Android), GIDSignIn SDK (iOS)
 
 ## Firebase Structure
 
