@@ -1,14 +1,21 @@
 package com.tonyseben.finaxor.di
 
+import com.tonyseben.finaxor.data.repository.AuthRepositoryImpl
 import com.tonyseben.finaxor.data.repository.FixedDepositRepositoryImpl
 import com.tonyseben.finaxor.data.repository.PortfolioRepositoryImpl
 import com.tonyseben.finaxor.data.repository.UserRepositoryImpl
+import com.tonyseben.finaxor.data.source.remote.AuthRemoteDataSource
 import com.tonyseben.finaxor.data.source.remote.FixedDepositRemoteDataSource
 import com.tonyseben.finaxor.data.source.remote.PortfolioRemoteDataSource
 import com.tonyseben.finaxor.data.source.remote.UserRemoteDataSource
+import com.tonyseben.finaxor.domain.repository.AuthRepository
 import com.tonyseben.finaxor.domain.repository.FixedDepositRepository
 import com.tonyseben.finaxor.domain.repository.PortfolioRepository
 import com.tonyseben.finaxor.domain.repository.UserRepository
+import com.tonyseben.finaxor.domain.usecase.auth.GetCurrentUserUseCase
+import com.tonyseben.finaxor.domain.usecase.auth.LogoutUseCase
+import com.tonyseben.finaxor.domain.usecase.auth.ObserveAuthStateUseCase
+import com.tonyseben.finaxor.domain.usecase.auth.SignInWithGoogleUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDCurrentValueUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDDaysUntilMaturityUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDInterestEarnedUseCase
@@ -29,6 +36,7 @@ import com.tonyseben.finaxor.domain.usecase.portfolio.DeletePortfolioUseCase
 import com.tonyseben.finaxor.domain.usecase.portfolio.GetUserPortfoliosUseCase
 import com.tonyseben.finaxor.domain.usecase.portfolio.UpdatePortfolioUseCase
 import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.auth.auth
 import dev.gitlive.firebase.firestore.firestore
 
 /**
@@ -43,8 +51,13 @@ object AppContainer {
 
     // Firebase
     private val firestore by lazy { Firebase.firestore }
+    private val auth by lazy { Firebase.auth }
 
     // Data Sources
+    private val authRemoteDataSource by lazy {
+        AuthRemoteDataSource(auth)
+    }
+
     private val userRemoteDataSource by lazy {
         UserRemoteDataSource(firestore)
     }
@@ -58,6 +71,10 @@ object AppContainer {
     }
 
     // Repositories
+    val authRepository: AuthRepository by lazy {
+        AuthRepositoryImpl(authRemoteDataSource)
+    }
+
     val userRepository: UserRepository by lazy {
         UserRepositoryImpl(userRemoteDataSource)
     }
@@ -76,6 +93,23 @@ object AppContainer {
     // ============================================
     // DOMAIN LAYER - USE CASES
     // ============================================
+
+    // Auth Use Cases
+    val signInWithGoogleUseCase by lazy {
+        SignInWithGoogleUseCase(authRepository, userRepository)
+    }
+
+    val getCurrentUserUseCase by lazy {
+        GetCurrentUserUseCase(authRepository, userRepository)
+    }
+
+    val logoutUseCase by lazy {
+        LogoutUseCase(authRepository)
+    }
+
+    val observeAuthStateUseCase by lazy {
+        ObserveAuthStateUseCase(authRepository)
+    }
 
     // Portfolio Use Cases
     val createPortfolioUseCase by lazy {
@@ -163,9 +197,16 @@ object AppContainer {
  */
 
 // Repositories
+fun getAuthRepository(): AuthRepository = AppContainer.authRepository
 fun getUserRepository(): UserRepository = AppContainer.userRepository
 fun getPortfolioRepository(): PortfolioRepository = AppContainer.portfolioRepository
 fun getFDRepository(): FixedDepositRepository = AppContainer.fdRepository
+
+// Auth Use Cases
+fun getSignInWithGoogleUseCase() = AppContainer.signInWithGoogleUseCase
+fun getGetCurrentUserUseCase() = AppContainer.getCurrentUserUseCase
+fun getLogoutUseCase() = AppContainer.logoutUseCase
+fun getObserveAuthStateUseCase() = AppContainer.observeAuthStateUseCase
 
 // Portfolio Use Cases
 fun getCreatePortfolioUseCase() = AppContainer.createPortfolioUseCase

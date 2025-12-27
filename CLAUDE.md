@@ -39,7 +39,7 @@ composeApp/src/commonMain/kotlin/com/tonyseben/finaxor/
 │   ├── mapper/       # Entity ↔ Domain mappers (extension functions)
 │   ├── source/remote/# Firebase data sources (Auth + Firestore)
 │   └── repository/   # Repository implementations
-├── presentation/     # UI layer
+├── ui/               # UI layer
 │   └── auth/         # Platform-specific auth launchers (expect/actual)
 ├── di/               # Manual DI via AppContainer singleton
 └── core/             # Result wrapper, AppError, utilities

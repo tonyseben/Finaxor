@@ -1,4 +1,4 @@
-package com.tonyseben.finaxor.presentation.auth
+package com.tonyseben.finaxor.ui.auth
 
 import com.tonyseben.finaxor.core.AppError
 import com.tonyseben.finaxor.core.Result

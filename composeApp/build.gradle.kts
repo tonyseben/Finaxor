@@ -37,6 +37,10 @@ kotlin {
             // Firebase Android SDK
             implementation(libs.firebase.auth.ktx)
             implementation(libs.firebase.firestore.ktx)
+            // Google Sign-In with Credential Manager
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.playServices)
+            implementation(libs.googleid)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

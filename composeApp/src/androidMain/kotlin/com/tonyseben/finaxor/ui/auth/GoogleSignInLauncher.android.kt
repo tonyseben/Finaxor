@@ -1,4 +1,4 @@
-package com.tonyseben.finaxor.presentation.auth
+package com.tonyseben.finaxor.ui.auth
 
 import android.content.Context
 import androidx.credentials.CredentialManager
