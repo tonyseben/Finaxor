@@ -1,6 +1,7 @@
 package com.tonyseben.finaxor.data.source.remote
 
 import com.tonyseben.finaxor.data.entity.UserEntity
+import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.FirebaseFirestore
 
 /**
@@ -17,7 +18,15 @@ class UserRemoteDataSource(private val firestore: FirebaseFirestore) {
         firestore
             .collection(COLLECTION_USERS)
             .document(entity.id)
-            .set(entity)
+            .set(
+                mapOf(
+                    "id" to entity.id,
+                    "name" to entity.name,
+                    "email" to entity.email,
+                    "photoURL" to entity.photoURL,
+                    "createdAt" to FieldValue.serverTimestamp
+                )
+            )
     }
 
     suspend fun getUser(userId: String): UserEntity {

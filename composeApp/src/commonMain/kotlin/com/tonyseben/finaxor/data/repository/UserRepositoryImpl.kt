@@ -7,7 +7,6 @@ import com.tonyseben.finaxor.data.mapper.toDomain
 import com.tonyseben.finaxor.data.source.remote.UserRemoteDataSource
 import com.tonyseben.finaxor.domain.model.User
 import com.tonyseben.finaxor.domain.repository.UserRepository
-import kotlin.time.Clock
 
 class UserRepositoryImpl(
     private val remoteDataSource: UserRemoteDataSource
@@ -20,17 +19,18 @@ class UserRepositoryImpl(
         photoURL: String?
     ): Result<User> {
         return try {
-            val now = Clock.System.now().toEpochMilliseconds()
             val entity = UserEntity(
                 id = userId,
                 name = name,
                 email = email,
-                photoURL = photoURL,
-                createdAt = now
+                photoURL = photoURL
+                // createdAt is set by Firestore server timestamp
             )
 
             remoteDataSource.createUser(entity)
-            Result.Success(entity.toDomain())
+            // Fetch the created user to get server-set createdAt
+            val createdEntity = remoteDataSource.getUser(userId)
+            Result.Success(createdEntity.toDomain())
         } catch (e: Exception) {
             Result.Error(e.toAppError())
         }
