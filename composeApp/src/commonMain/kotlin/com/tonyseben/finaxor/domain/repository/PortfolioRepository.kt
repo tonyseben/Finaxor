@@ -42,5 +42,5 @@ interface PortfolioRepository {
 
     suspend fun getMemberRole(portfolioId: String, userId: String): Result<PortfolioRole?>
 
-    suspend fun isLastAdmin(portfolioId: String, userId: String): Result<Boolean>
+    suspend fun isLastOwner(portfolioId: String, userId: String): Result<Boolean>
 }

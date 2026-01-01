@@ -49,8 +49,8 @@ fun PortfolioMember.toEntity(): PortfolioMemberEntity {
 
 fun String.toPortfolioRole(): PortfolioRole? {
     return when (this.lowercase()) {
-        "admin" -> PortfolioRole.ADMIN
-        "editor" -> PortfolioRole.EDITOR
+        "owner" -> PortfolioRole.OWNER
+        "member" -> PortfolioRole.MEMBER
         "viewer" -> PortfolioRole.VIEWER
         else -> null
     }
@@ -58,8 +58,8 @@ fun String.toPortfolioRole(): PortfolioRole? {
 
 fun PortfolioRole.toRoleString(): String {
     return when (this) {
-        PortfolioRole.ADMIN -> "admin"
-        PortfolioRole.EDITOR -> "editor"
+        PortfolioRole.OWNER -> "owner"
+        PortfolioRole.MEMBER -> "member"
         PortfolioRole.VIEWER -> "viewer"
     }
 }

@@ -1,8 +1,8 @@
 package com.tonyseben.finaxor.domain.model
 
 enum class PortfolioRole {
-    ADMIN,
-    EDITOR,
+    OWNER,
+    MEMBER,
     VIEWER;
 
     companion object Companion {

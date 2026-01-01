@@ -163,7 +163,7 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             }
     }
 
-    suspend fun getAdminCount(portfolioId: String): Int {
+    suspend fun getOwnerCount(portfolioId: String): Int {
         val snapshot = firestore
             .collection(COLLECTION_PORTFOLIOS)
             .document(portfolioId)
@@ -172,7 +172,7 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
 
         return snapshot.documents.count { doc ->
             val member = doc.toPortfolioMemberEntity()
-            member.role == "admin"
+            member.role == "owner"
         }
     }
 

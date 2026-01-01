@@ -40,11 +40,11 @@ class PortfolioRepositoryImpl(
 
             val portfolioId = portfolioDataSource.createPortfolio(portfolioEntity)
 
-            // Add creator as admin member
+            // Add creator as owner member
             val memberEntity = PortfolioMemberEntity(
                 userId = userId,
                 portfolioId = portfolioId,
-                role = "admin",
+                role = "owner",
                 addedBy = userId,
                 addedAt = now
             )
@@ -54,7 +54,7 @@ class PortfolioRepositoryImpl(
             val accessEntity = PortfolioAccessEntity(
                 portfolioId = portfolioId,
                 portfolioName = name,
-                role = "admin",
+                role = "owner",
                 addedAt = now
             )
             portfolioDataSource.addPortfolioAccess(userId, accessEntity)
@@ -215,13 +215,13 @@ class PortfolioRepositoryImpl(
         }
     }
 
-    override suspend fun isLastAdmin(portfolioId: String, userId: String): Result<Boolean> {
+    override suspend fun isLastOwner(portfolioId: String, userId: String): Result<Boolean> {
         return try {
-            val adminCount = portfolioDataSource.getAdminCount(portfolioId)
+            val ownerCount = portfolioDataSource.getOwnerCount(portfolioId)
             val member = portfolioDataSource.getMember(portfolioId, userId)
-            val isAdmin = member.role == "admin"
+            val isOwner = member.role == "owner"
 
-            Result.Success(adminCount == 1 && isAdmin)
+            Result.Success(ownerCount == 1 && isOwner)
         } catch (e: Exception) {
             Result.Error(e.toAppError())
         }
