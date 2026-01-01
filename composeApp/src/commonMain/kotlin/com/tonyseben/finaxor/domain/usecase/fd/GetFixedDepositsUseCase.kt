@@ -6,7 +6,7 @@ import com.tonyseben.finaxor.domain.repository.FixedDepositRepository
 import com.tonyseben.finaxor.domain.usecase.FlowUseCase
 import kotlinx.coroutines.flow.Flow
 
-class GetPortfolioFDsUseCase(
+class GetFixedDepositsUseCase(
     private val fdRepository: FixedDepositRepository
 ) : FlowUseCase<String, List<FixedDeposit>> {
 

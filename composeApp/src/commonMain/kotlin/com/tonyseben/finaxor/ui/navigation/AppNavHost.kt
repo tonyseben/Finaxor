@@ -16,7 +16,7 @@ import com.tonyseben.finaxor.ui.auth.LoginScreen
 import com.tonyseben.finaxor.ui.home.CreatePortfolioSheet
 import com.tonyseben.finaxor.ui.home.HomeScreen
 import com.tonyseben.finaxor.ui.home.HomeViewModel
-import com.tonyseben.finaxor.ui.portfolio.PortfolioDetailScreen
+import com.tonyseben.finaxor.ui.portfolio.PortfolioScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +59,10 @@ fun AppNavHost(
                     portfolios = homeUiState.portfolios,
                     isLoading = isLoading || homeUiState.isLoading,
                     onLogout = onLogout,
-                    onCreateClick = { homeViewModel.showCreateSheet() }
+                    onCreateClick = { homeViewModel.showCreateSheet() },
+                    onPortfolioClick = { portfolioId ->
+                        navController.navigate(Route.PortfolioDetail.createRoute(portfolioId))
+                    }
                 )
 
                 if (homeUiState.showCreateSheet) {
@@ -82,7 +85,7 @@ fun AppNavHost(
 
         composable(Route.PortfolioDetail.route) { backStackEntry ->
             val portfolioId = backStackEntry.arguments?.getString("portfolioId") ?: return@composable
-            PortfolioDetailScreen(
+            PortfolioScreen(
                 portfolioId = portfolioId,
                 onBackClick = { navController.popBackStack() }
             )
