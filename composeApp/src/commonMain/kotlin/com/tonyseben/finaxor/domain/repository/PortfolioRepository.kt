@@ -4,6 +4,7 @@ import com.tonyseben.finaxor.core.Result
 import com.tonyseben.finaxor.domain.model.Portfolio
 import com.tonyseben.finaxor.domain.model.PortfolioRole
 import com.tonyseben.finaxor.domain.model.User
+import com.tonyseben.finaxor.domain.model.UserPortfolio
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -19,7 +20,7 @@ interface PortfolioRepository {
     suspend fun deletePortfolio(portfolioId: String): Result<Unit>
 
     // Portfolio queries
-    fun getUserPortfolios(userId: String): Flow<Result<List<Portfolio>>>
+    fun getUserPortfolios(userId: String): Flow<Result<List<UserPortfolio>>>
 
     // Member management
     suspend fun addMember(

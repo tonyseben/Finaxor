@@ -1,6 +1,11 @@
 package com.tonyseben.finaxor.ui.navigation
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -8,8 +13,13 @@ import androidx.navigation.compose.composable
 import com.tonyseben.finaxor.domain.model.AuthUser
 import com.tonyseben.finaxor.ui.auth.GoogleSignInLauncher
 import com.tonyseben.finaxor.ui.auth.LoginScreen
+import com.tonyseben.finaxor.ui.home.CreatePortfolioSheet
 import com.tonyseben.finaxor.ui.home.HomeScreen
+import com.tonyseben.finaxor.ui.home.HomeViewModel
+import com.tonyseben.finaxor.ui.portfolio.PortfolioDetailScreen
+import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -40,12 +50,42 @@ fun AppNavHost(
 
         composable(Route.Home.route) {
             currentUser?.let { user ->
+                val homeViewModel: HomeViewModel = koinViewModel()
+                val homeUiState by homeViewModel.uiState.collectAsState()
+                val sheetState = rememberModalBottomSheetState()
+
                 HomeScreen(
                     user = user,
-                    isLoading = isLoading,
-                    onLogout = onLogout
+                    portfolios = homeUiState.portfolios,
+                    isLoading = isLoading || homeUiState.isLoading,
+                    onLogout = onLogout,
+                    onCreateClick = { homeViewModel.showCreateSheet() }
                 )
+
+                if (homeUiState.showCreateSheet) {
+                    ModalBottomSheet(
+                        onDismissRequest = { homeViewModel.hideCreateSheet() },
+                        sheetState = sheetState
+                    ) {
+                        CreatePortfolioSheet(
+                            isCreating = homeUiState.isCreating,
+                            onCreateClick = { name ->
+                                homeViewModel.createPortfolio(name) { portfolioId ->
+                                    navController.navigate(Route.PortfolioDetail.createRoute(portfolioId))
+                                }
+                            }
+                        )
+                    }
+                }
             }
+        }
+
+        composable(Route.PortfolioDetail.route) { backStackEntry ->
+            val portfolioId = backStackEntry.arguments?.getString("portfolioId") ?: return@composable
+            PortfolioDetailScreen(
+                portfolioId = portfolioId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

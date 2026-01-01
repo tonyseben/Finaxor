@@ -8,11 +8,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,20 +28,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.tonyseben.finaxor.domain.model.AuthUser
+import com.tonyseben.finaxor.domain.model.UserPortfolio
 
 @Composable
 fun HomeScreen(
     user: AuthUser,
+    portfolios: List<UserPortfolio>,
     isLoading: Boolean,
     onLogout: () -> Unit,
+    onCreateClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Scaffold(
+        modifier = modifier,
+        floatingActionButton = {
+            FloatingActionButton(onClick = onCreateClick) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Create Portfolio"
+                )
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         Spacer(modifier = Modifier.height(48.dp))
 
         Surface(
@@ -67,24 +89,36 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Card(
+        Text(
+            text = "Your Portfolios",
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Your Portfolios",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (portfolios.isEmpty()) {
+            Card(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "No portfolios yet. Create your first portfolio to get started.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(16.dp)
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                items(portfolios, key = { it.id }) { portfolio ->
+                    PortfolioItem(portfolio = portfolio)
+                }
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedButton(
             onClick = onLogout,
@@ -99,6 +133,7 @@ fun HomeScreen(
             } else {
                 Text("Sign Out")
             }
+        }
         }
     }
 }

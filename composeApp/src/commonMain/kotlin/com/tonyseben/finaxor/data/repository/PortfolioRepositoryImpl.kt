@@ -14,6 +14,7 @@ import com.tonyseben.finaxor.data.source.remote.UserRemoteDataSource
 import com.tonyseben.finaxor.domain.model.Portfolio
 import com.tonyseben.finaxor.domain.model.PortfolioRole
 import com.tonyseben.finaxor.domain.model.User
+import com.tonyseben.finaxor.domain.model.UserPortfolio
 import com.tonyseben.finaxor.domain.repository.PortfolioRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -98,21 +99,19 @@ class PortfolioRepositoryImpl(
         }
     }
 
-    override fun getUserPortfolios(userId: String): Flow<Result<List<Portfolio>>> {
+    override fun getUserPortfolios(userId: String): Flow<Result<List<UserPortfolio>>> {
         return portfolioDataSource.getUserPortfolioAccess(userId)
-            .map { accessList ->
-                try {
-                    val portfolios = accessList.mapNotNull { access ->
-                        try {
-                            portfolioDataSource.getPortfolio(access.portfolioId).toDomain()
-                        } catch (e: Exception) {
-                            null
-                        }
+            .map<_, Result<List<UserPortfolio>>> { accessList ->
+                val portfolios = accessList.mapNotNull { access ->
+                    access.role.toPortfolioRole()?.let { role ->
+                        UserPortfolio(
+                            id = access.portfolioId,
+                            name = access.portfolioName,
+                            role = role
+                        )
                     }
-                    Result.Success(portfolios)
-                } catch (e: Exception) {
-                    Result.Error(e.toAppError())
                 }
+                Result.Success(portfolios)
             }
             .catch { e ->
                 emit(Result.Error((e as? Exception)?.toAppError() ?: AppError.UnknownError()))

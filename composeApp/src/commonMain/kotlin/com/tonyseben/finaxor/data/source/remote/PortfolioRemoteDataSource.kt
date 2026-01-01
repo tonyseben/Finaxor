@@ -1,10 +1,14 @@
 package com.tonyseben.finaxor.data.source.remote
 
 import com.tonyseben.finaxor.core.generateFirestoreId
+import com.tonyseben.finaxor.core.toEpochMillis
 import com.tonyseben.finaxor.data.entity.PortfolioAccessEntity
 import com.tonyseben.finaxor.data.entity.PortfolioEntity
 import com.tonyseben.finaxor.data.entity.PortfolioMemberEntity
+import dev.gitlive.firebase.firestore.DocumentSnapshot
+import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.FirebaseFirestore
+import dev.gitlive.firebase.firestore.Timestamp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -21,12 +25,49 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
         const val COLLECTION_PORTFOLIO_ACCESS = "portfolioAccess"
     }
 
+    // Manual mapping functions to handle Firestore Timestamps
+    private fun DocumentSnapshot.toPortfolioEntity(): PortfolioEntity {
+        return PortfolioEntity(
+            id = get<String?>("id") ?: id,
+            name = get<String?>("name") ?: "",
+            createdBy = get<String?>("createdBy") ?: "",
+            createdAt = get<Timestamp?>("createdAt")?.toEpochMillis() ?: 0L,
+            updatedAt = get<Timestamp?>("updatedAt")?.toEpochMillis() ?: 0L
+        )
+    }
+
+    private fun DocumentSnapshot.toPortfolioAccessEntity(): PortfolioAccessEntity {
+        return PortfolioAccessEntity(
+            portfolioId = get<String?>("portfolioId") ?: id,
+            portfolioName = get<String?>("portfolioName") ?: "",
+            role = get<String?>("role") ?: "",
+            addedAt = get<Timestamp?>("addedAt")?.toEpochMillis() ?: 0L
+        )
+    }
+
+    private fun DocumentSnapshot.toPortfolioMemberEntity(): PortfolioMemberEntity {
+        return PortfolioMemberEntity(
+            userId = get<String?>("userId") ?: id,
+            portfolioId = get<String?>("portfolioId") ?: "",
+            role = get<String?>("role") ?: "",
+            addedBy = get<String?>("addedBy") ?: "",
+            addedAt = get<Timestamp?>("addedAt")?.toEpochMillis() ?: 0L
+        )
+    }
+
     // Portfolio operations
     suspend fun createPortfolio(entity: PortfolioEntity): String {
         val id = generateFirestoreId()
         val ref = firestore.collection(COLLECTION_PORTFOLIOS).document(id)
-        val portfolioWithId = entity.copy(id = ref.id)
-        ref.set(portfolioWithId)
+        ref.set(
+            mapOf(
+                "id" to ref.id,
+                "name" to entity.name,
+                "createdBy" to entity.createdBy,
+                "createdAt" to FieldValue.serverTimestamp,
+                "updatedAt" to FieldValue.serverTimestamp
+            )
+        )
         return ref.id
     }
 
@@ -35,7 +76,7 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .collection(COLLECTION_PORTFOLIOS)
             .document(portfolioId)
             .get()
-            .data()
+            .toPortfolioEntity()
     }
 
     suspend fun updatePortfolio(portfolioId: String, updates: Map<String, Any>) {
@@ -59,7 +100,9 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .collection(COLLECTION_PORTFOLIO_ACCESS)
             .snapshots
             .map { snapshot ->
-                snapshot.documents.map { it.data<PortfolioAccessEntity>() }
+                snapshot.documents.map { doc ->
+                    doc.toPortfolioAccessEntity()
+                }
             }
     }
 
@@ -70,7 +113,15 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .document(portfolioId)
             .collection(COLLECTION_MEMBERS)
             .document(entity.userId)
-            .set(entity)
+            .set(
+                mapOf(
+                    "userId" to entity.userId,
+                    "portfolioId" to entity.portfolioId,
+                    "role" to entity.role,
+                    "addedBy" to entity.addedBy,
+                    "addedAt" to FieldValue.serverTimestamp
+                )
+            )
     }
 
     suspend fun getMember(portfolioId: String, userId: String): PortfolioMemberEntity {
@@ -80,7 +131,7 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .collection(COLLECTION_MEMBERS)
             .document(userId)
             .get()
-            .data()
+            .toPortfolioMemberEntity()
     }
 
     suspend fun updateMember(portfolioId: String, userId: String, updates: Map<String, Any>) {
@@ -108,7 +159,7 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .collection(COLLECTION_MEMBERS)
             .snapshots
             .map { snapshot ->
-                snapshot.documents.map { it.data() }
+                snapshot.documents.map { it.toPortfolioMemberEntity() }
             }
     }
 
@@ -120,7 +171,7 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .get()
 
         return snapshot.documents.count { doc ->
-            val member = doc.data<PortfolioMemberEntity>()
+            val member = doc.toPortfolioMemberEntity()
             member.role == "admin"
         }
     }
@@ -132,7 +183,14 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .document(userId)
             .collection(COLLECTION_PORTFOLIO_ACCESS)
             .document(entity.portfolioId)
-            .set(entity)
+            .set(
+                mapOf(
+                    "portfolioId" to entity.portfolioId,
+                    "portfolioName" to entity.portfolioName,
+                    "role" to entity.role,
+                    "addedAt" to FieldValue.serverTimestamp
+                )
+            )
     }
 
     suspend fun updatePortfolioAccess(

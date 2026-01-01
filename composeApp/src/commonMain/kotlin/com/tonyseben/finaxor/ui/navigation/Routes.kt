@@ -6,4 +6,8 @@ sealed class Route(val route: String) {
 
     // Main flow (authenticated)
     data object Home : Route("home")
+
+    data object PortfolioDetail : Route("portfolio/{portfolioId}") {
+        fun createRoute(portfolioId: String) = "portfolio/$portfolioId"
+    }
 }
