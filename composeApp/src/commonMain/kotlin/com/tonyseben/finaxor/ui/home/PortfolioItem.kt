@@ -14,9 +14,11 @@ import com.tonyseben.finaxor.domain.model.UserPortfolio
 @Composable
 fun PortfolioItem(
     portfolio: UserPortfolio,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)

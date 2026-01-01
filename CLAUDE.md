@@ -10,6 +10,9 @@ repository.
 ./gradlew :composeApp:assembleDebug     # Build debug APK
 ./gradlew :composeApp:assembleRelease   # Build release APK
 
+# Desktop (JVM)
+./gradlew :composeApp:run               # Run desktop app (with hot reload)
+
 # iOS - Use Xcode with iosApp/iosApp.xcodeproj
 
 # Testing
@@ -38,7 +41,7 @@ composeApp/src/commonMain/kotlin/com/tonyseben/finaxor/
 │   └── repository/   # Repository implementations
 ├── ui/               # UI layer
 │   └── auth/         # Platform-specific auth launchers (expect/actual)
-├── di/               # Manual DI via AppContainer singleton
+├── di/               # Koin DI modules (DataModule, DomainModule, UiModule)
 └── core/             # Result wrapper, AppError, utilities
 ```
 
@@ -67,11 +70,13 @@ composeApp/src/commonMain/kotlin/com/tonyseben/finaxor/
 ## Tech Stack
 
 - **Kotlin**: 2.3.0 with Compose Compiler Plugin
-- **Compose Multiplatform**: 1.9.3
+- **Compose Multiplatform**: 1.9.3 (with Hot Reload plugin)
+- **DI**: Koin 4.0.0
 - **Firebase (GitLive KMP)**: 2.1.0 (firebase-auth, firebase-firestore)
 - **Kotlinx**: Serialization 1.8.0, DateTime 0.6.1, Coroutines 1.10.2
-- **Android**: minSdk 24, targetSdk 36, compileSdk 35, JVM 11
+- **Android**: minSdk 24, targetSdk 36, compileSdk 35, JVM 17
 - **Google Sign-In**: Credential Manager API (Android), GIDSignIn SDK (iOS)
+- **Logging**: Kermit 2.0.4
 
 ## Firebase Structure
 
@@ -92,7 +97,8 @@ portfolios/{portfolioId}/fixedDeposits/     # Fixed deposits
 5. Create mappers in `data/mapper/`
 6. Create data source in `data/source/remote/`
 7. Implement repository in `data/repository/`
-8. Register dependencies in `di/AppContainer.kt`
+8. Register dependencies in Koin modules (`di/DataModule.kt`, `di/DomainModule.kt`,
+   `di/UiModule.kt`)
 
 ## Current State & Roadmap
 

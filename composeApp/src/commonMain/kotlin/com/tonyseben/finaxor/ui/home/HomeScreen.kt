@@ -37,6 +37,7 @@ fun HomeScreen(
     isLoading: Boolean,
     onLogout: () -> Unit,
     onCreateClick: () -> Unit,
+    onPortfolioClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -113,7 +114,10 @@ fun HomeScreen(
                     .weight(1f)
             ) {
                 items(portfolios, key = { it.id }) { portfolio ->
-                    PortfolioItem(portfolio = portfolio)
+                    PortfolioItem(
+                        portfolio = portfolio,
+                        onClick = { onPortfolioClick(portfolio.id) }
+                    )
                 }
             }
         }
