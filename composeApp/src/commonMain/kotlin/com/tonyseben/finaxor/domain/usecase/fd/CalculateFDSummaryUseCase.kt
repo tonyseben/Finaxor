@@ -1,16 +1,24 @@
 package com.tonyseben.finaxor.domain.usecase.fd
 
 import com.tonyseben.finaxor.core.Result
-import com.tonyseben.finaxor.domain.model.AssetSummary
-import com.tonyseben.finaxor.domain.model.AssetType
 import com.tonyseben.finaxor.domain.model.FixedDeposit
 import com.tonyseben.finaxor.domain.usecase.UseCase
 
+/**
+ * Calculates summary values for a list of Fixed Deposits.
+ * Returns raw calculation values - caller is responsible for adding type info.
+ */
 class CalculateFDSummaryUseCase(
     private val calculateFDCurrentValueUseCase: CalculateFDCurrentValueUseCase
-) : UseCase<List<FixedDeposit>, AssetSummary?> {
+) : UseCase<List<FixedDeposit>, CalculateFDSummaryUseCase.SummaryValues?> {
 
-    override suspend fun invoke(params: List<FixedDeposit>): Result<AssetSummary?> {
+    data class SummaryValues(
+        val investedAmount: Double,
+        val currentValue: Double,
+        val returnsPercent: Double
+    )
+
+    override suspend fun invoke(params: List<FixedDeposit>): Result<SummaryValues?> {
         if (params.isEmpty()) {
             return Result.Success(null)
         }
@@ -34,8 +42,7 @@ class CalculateFDSummaryUseCase(
         }
 
         return Result.Success(
-            AssetSummary(
-                assetType = AssetType.FIXED_DEPOSIT,
+            SummaryValues(
                 investedAmount = investedAmount,
                 currentValue = currentValue,
                 returnsPercent = returnsPercent

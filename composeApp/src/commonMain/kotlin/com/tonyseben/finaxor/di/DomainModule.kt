@@ -1,14 +1,17 @@
 package com.tonyseben.finaxor.di
 
+import com.tonyseben.finaxor.domain.asset.AssetStrategy
+import com.tonyseben.finaxor.domain.asset.FixedDepositStrategy
 import com.tonyseben.finaxor.domain.usecase.auth.GetCurrentUserUseCase
 import com.tonyseben.finaxor.domain.usecase.auth.LogoutUseCase
 import com.tonyseben.finaxor.domain.usecase.auth.ObserveAuthStateUseCase
 import com.tonyseben.finaxor.domain.usecase.auth.SignInWithGoogleUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDCurrentValueUseCase
-import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDSummaryUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDDaysUntilMaturityUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDInterestEarnedUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDMaturityAmountUseCase
+import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDStatsUseCase
+import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDSummaryUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CreateFixedDepositUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.DeleteFixedDepositUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.GetFDStatusUseCase
@@ -35,10 +38,14 @@ val domainModule = module {
     factory { LogoutUseCase(get()) }
     factory { ObserveAuthStateUseCase(get()) }
 
+    // Asset Strategies
+    factory<AssetStrategy> { FixedDepositStrategy(get(), get()) }
+    factory { listOf(get<AssetStrategy>()) }
+
     // Portfolio Use Cases
     factory { CreatePortfolioUseCase(get()) }
     factory { GetPortfolioUseCase(get()) }
-    factory { GetPortfolioSummaryUseCase(get(), get(), get()) }
+    factory { GetPortfolioSummaryUseCase(get(), get()) }
     factory { GetUserPortfoliosUseCase(get()) }
     factory { UpdatePortfolioUseCase(get()) }
     factory { DeletePortfolioUseCase(get()) }
@@ -60,6 +67,7 @@ val domainModule = module {
     factory { CalculateFDInterestEarnedUseCase(get()) }
     factory { CalculateFDCurrentValueUseCase(get()) }
     factory { CalculateFDSummaryUseCase(get()) }
+    factory { CalculateFDStatsUseCase(get(), get(), get(), get(), get()) }
     factory { IsFDMaturedUseCase() }
     factory { IsFDActiveUseCase() }
     factory { CalculateFDDaysUntilMaturityUseCase() }

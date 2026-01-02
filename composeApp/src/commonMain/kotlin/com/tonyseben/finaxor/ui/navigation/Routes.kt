@@ -10,4 +10,9 @@ sealed class Route(val route: String) {
     data object PortfolioDetail : Route("portfolio/{portfolioId}") {
         fun createRoute(portfolioId: String) = "portfolio/$portfolioId"
     }
+
+    data object FD : Route("portfolio/{portfolioId}/fd/{fdId}") {
+        fun createRoute(portfolioId: String, fdId: String?) =
+            "portfolio/$portfolioId/fd/${fdId ?: "new"}"
+    }
 }

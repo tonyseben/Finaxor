@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import com.tonyseben.finaxor.domain.model.AuthUser
 import com.tonyseben.finaxor.ui.auth.GoogleSignInLauncher
 import com.tonyseben.finaxor.ui.auth.LoginScreen
+import com.tonyseben.finaxor.ui.fd.FDScreen
 import com.tonyseben.finaxor.ui.home.CreatePortfolioSheet
 import com.tonyseben.finaxor.ui.home.HomeScreen
 import com.tonyseben.finaxor.ui.home.HomeViewModel
@@ -87,7 +88,23 @@ fun AppNavHost(
             val portfolioId = backStackEntry.arguments?.getString("portfolioId") ?: return@composable
             PortfolioScreen(
                 portfolioId = portfolioId,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onAddAsset = { assetType ->
+                    if (assetType == "FIXED_DEPOSIT") {
+                        navController.navigate(Route.FD.createRoute(portfolioId, null))
+                    }
+                }
+            )
+        }
+
+        composable(Route.FD.route) { backStackEntry ->
+            val portfolioId = backStackEntry.arguments?.getString("portfolioId") ?: return@composable
+            val fdId = backStackEntry.arguments?.getString("fdId")?.takeIf { it != "new" }
+            FDScreen(
+                portfolioId = portfolioId,
+                fdId = fdId,
+                onBackClick = { navController.popBackStack() },
+                onDeleted = { navController.popBackStack() }
             )
         }
     }

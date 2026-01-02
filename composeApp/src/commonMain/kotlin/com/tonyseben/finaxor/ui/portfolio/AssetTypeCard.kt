@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tonyseben.finaxor.core.formatCurrency
 import com.tonyseben.finaxor.domain.model.AssetSummary
 
 @Composable
@@ -28,7 +29,7 @@ fun AssetTypeCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = summary.assetType.displayName(),
+                text = summary.displayName,
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -74,17 +75,14 @@ fun AssetTypeCard(
                 } else {
                     MaterialTheme.colorScheme.error
                 }
-                val returnsPrefix = if (summary.returnsPercent >= 0) "+" else ""
+                val returnsPrefix = if (summary.returnsPercent >= 0) "+" else "-"
+                val formattedReturns = ((summary.returnsPercent * 100).toInt() / 100.0).toString()
                 Text(
-                    text = "$returnsPrefix${String.format("%.2f", summary.returnsPercent)}%",
+                    text = "$returnsPrefix$formattedReturns%",
                     style = MaterialTheme.typography.labelLarge,
                     color = returnsColor
                 )
             }
         }
     }
-}
-
-private fun formatCurrency(amount: Double): String {
-    return "₹${String.format("%,.0f", amount)}"
 }

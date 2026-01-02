@@ -49,4 +49,12 @@ class PortfolioViewModel(
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
+
+    fun showAddAssetSheet() {
+        _uiState.value = _uiState.value.copy(showAddAssetSheet = true)
+    }
+
+    fun hideAddAssetSheet() {
+        _uiState.value = _uiState.value.copy(showAddAssetSheet = false)
+    }
 }
