@@ -1,8 +1,26 @@
 package com.tonyseben.finaxor.core
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
+import kotlinx.datetime.toLocalDateTime
+
 // ============================================
 // UTILITY FUNCTIONS
 // ============================================
+
+fun formatCurrency(amount: Double): String {
+    val rounded = amount.toLong()
+    val formatted = rounded.toString().reversed().chunked(3).joinToString(",").reversed()
+    return "₹$formatted"
+}
+
+
+fun formatDate(millis: Long): String {
+    val instant = Instant.fromEpochMilliseconds(millis)
+    val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    return "${localDate.dayOfMonth}/${localDate.monthNumber}/${localDate.year}"
+}
 
 /**
  * Wrap a suspend function call in Result
