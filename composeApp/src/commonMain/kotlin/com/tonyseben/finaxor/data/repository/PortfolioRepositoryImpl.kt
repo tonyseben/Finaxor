@@ -34,13 +34,13 @@ class PortfolioRepositoryImpl(
             val memberEntity = PortfolioMemberEntity(
                 userId = userId,
                 portfolioId = "", // Will be set by batch operation
-                role = "owner",
+                role = PortfolioRole.OWNER.value,
                 addedBy = userId
             )
             val accessEntity = PortfolioAccessEntity(
                 portfolioId = "", // Will be set by batch operation
                 portfolioName = name,
-                role = "owner"
+                role = PortfolioRole.OWNER.value
             )
 
             // Atomic batch operation: creates portfolio, member, and access together

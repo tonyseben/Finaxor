@@ -42,6 +42,15 @@ class UpdateFixedDepositUseCase(
             return Result.Error(AppError.ValidationError("bankName", "Bank name cannot be empty"))
         }
 
+        if (params.accountNumber.isBlank()) {
+            return Result.Error(
+                AppError.ValidationError(
+                    "accountNumber",
+                    "Account number cannot be empty"
+                )
+            )
+        }
+
         if (params.principalAmount <= 0) {
             return Result.Error(
                 AppError.ValidationError(

@@ -37,8 +37,8 @@ class AddMemberUseCase(
             )
         }
 
-        // Validate email
-        if (!params.userEmail.contains("@")) {
+        // Validate email format
+        if (!isValidEmail(params.userEmail)) {
             return Result.Error(
                 AppError.ValidationError(
                     field = "email",
@@ -68,5 +68,13 @@ class AddMemberUseCase(
             role = params.role,
             addedBy = params.addedBy
         )
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        if (email.isBlank()) return false
+        val parts = email.split("@")
+        if (parts.size != 2) return false
+        val (local, domain) = parts
+        return local.isNotBlank() && domain.contains(".") && domain.length >= 3
     }
 }

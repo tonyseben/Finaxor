@@ -1,13 +1,12 @@
 package com.tonyseben.finaxor.domain.model
 
-enum class PortfolioRole {
-    OWNER,
-    MEMBER,
-    VIEWER;
+enum class PortfolioRole(val value: String) {
+    OWNER("owner"),
+    MEMBER("member"),
+    VIEWER("viewer");
 
-    companion object Companion {
-        fun fromString(value: String): PortfolioRole? {
-            return entries.find { it.name.equals(value, ignoreCase = true) }
-        }
+    companion object {
+        fun fromValue(value: String): PortfolioRole? =
+            entries.find { it.value == value.lowercase() }
     }
 }

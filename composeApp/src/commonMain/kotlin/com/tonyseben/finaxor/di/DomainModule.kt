@@ -66,12 +66,12 @@ val domainModule = module {
     factory { GetFixedDepositUseCase(get()) }
     factory { GetFixedDepositsUseCase(get()) }
 
-    // FD Calculation Use Cases
+    // FD Calculation Use Cases (all delegate to FDCalculator)
     factory { CalculateFDMaturityAmountUseCase() }
-    factory { CalculateFDInterestEarnedUseCase(get()) }
-    factory { CalculateFDCurrentValueUseCase(get()) }
+    factory { CalculateFDInterestEarnedUseCase() }
+    factory { CalculateFDCurrentValueUseCase() }
     factory { CalculateFDSummaryUseCase(get()) }
-    factory { CalculateFDStatsUseCase(get(), get(), get(), get(), get()) }
+    factory { CalculateFDStatsUseCase() }
     factory { IsFDMaturedUseCase() }
     factory { IsFDActiveUseCase() }
     factory { CalculateFDDaysUntilMaturityUseCase() }

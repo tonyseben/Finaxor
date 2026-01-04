@@ -32,6 +32,15 @@ class CreatePortfolioUseCase(
             )
         }
 
+        if (params.userId.isBlank()) {
+            return Result.Error(
+                AppError.ValidationError(
+                    field = "userId",
+                    message = "User ID cannot be empty"
+                )
+            )
+        }
+
         return portfolioRepository.createPortfolio(params.name, params.userId)
     }
 }

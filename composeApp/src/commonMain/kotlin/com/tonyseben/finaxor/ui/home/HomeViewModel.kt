@@ -21,8 +21,6 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    private var currentUserId: String? = null
-
     init {
         observeAuthAndLoadPortfolios()
     }
@@ -34,7 +32,9 @@ class HomeViewModel(
                     is Result.Success -> {
                         val authState = result.data
                         if (authState is AuthState.Authenticated) {
-                            currentUserId = authState.user.uid
+                            _uiState.value = _uiState.value.copy(
+                                currentUserId = authState.user.uid
+                            )
                             loadPortfolios(authState.user.uid)
                         }
                     }
@@ -85,7 +85,7 @@ class HomeViewModel(
     }
 
     fun createPortfolio(name: String, onSuccess: (portfolioId: String) -> Unit) {
-        val userId = currentUserId ?: return
+        val userId = _uiState.value.currentUserId ?: return
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isCreating = true)

@@ -47,22 +47,9 @@ fun PortfolioMember.toEntity(): PortfolioMemberEntity {
     )
 }
 
-fun String.toPortfolioRole(): PortfolioRole? {
-    return when (this.lowercase()) {
-        "owner" -> PortfolioRole.OWNER
-        "member" -> PortfolioRole.MEMBER
-        "viewer" -> PortfolioRole.VIEWER
-        else -> null
-    }
-}
+fun String.toPortfolioRole(): PortfolioRole? = PortfolioRole.fromValue(this)
 
-fun PortfolioRole.toRoleString(): String {
-    return when (this) {
-        PortfolioRole.OWNER -> "owner"
-        PortfolioRole.MEMBER -> "member"
-        PortfolioRole.VIEWER -> "viewer"
-    }
-}
+fun PortfolioRole.toRoleString(): String = value
 
 
 @JvmName("portfoliosToDomain")

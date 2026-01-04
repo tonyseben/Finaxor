@@ -5,6 +5,7 @@ import com.tonyseben.finaxor.core.toEpochMillis
 import com.tonyseben.finaxor.data.entity.PortfolioAccessEntity
 import com.tonyseben.finaxor.data.entity.PortfolioEntity
 import com.tonyseben.finaxor.data.entity.PortfolioMemberEntity
+import com.tonyseben.finaxor.domain.model.PortfolioRole
 import dev.gitlive.firebase.firestore.DocumentSnapshot
 import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.FirebaseFirestore
@@ -177,7 +178,7 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
 
         return snapshot.documents.count { doc ->
             val member = doc.toPortfolioMemberEntity()
-            member.role == "owner"
+            member.role == PortfolioRole.OWNER.value
         }
     }
 
@@ -193,7 +194,7 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .get()
 
         val members = snapshot.documents.map { it.toPortfolioMemberEntity() }
-        val owners = members.filter { it.role == "owner" }
+        val owners = members.filter { it.role == PortfolioRole.OWNER.value }
 
         return owners.size == 1 && owners.first().userId == userId
     }
