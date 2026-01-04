@@ -2,6 +2,7 @@ package com.tonyseben.finaxor.di
 
 import com.tonyseben.finaxor.domain.asset.AssetStrategy
 import com.tonyseben.finaxor.domain.asset.FixedDepositStrategy
+import com.tonyseben.finaxor.domain.usecase.auth.GetCurrentAuthUserUseCase
 import com.tonyseben.finaxor.domain.usecase.auth.GetCurrentUserUseCase
 import com.tonyseben.finaxor.domain.usecase.auth.LogoutUseCase
 import com.tonyseben.finaxor.domain.usecase.auth.ObserveAuthStateUseCase
@@ -15,6 +16,7 @@ import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDSummaryUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CreateFixedDepositUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.DeleteFixedDepositUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.GetFDStatusUseCase
+import com.tonyseben.finaxor.domain.usecase.fd.GetFixedDepositUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.GetFixedDepositsUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.IsFDActiveUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.IsFDMaturedUseCase
@@ -35,6 +37,7 @@ val domainModule = module {
     // Auth Use Cases
     factory { SignInWithGoogleUseCase(get(), get()) }
     factory { GetCurrentUserUseCase(get(), get()) }
+    factory { GetCurrentAuthUserUseCase(get()) }
     factory { LogoutUseCase(get()) }
     factory { ObserveAuthStateUseCase(get()) }
 
@@ -60,6 +63,7 @@ val domainModule = module {
     factory { CreateFixedDepositUseCase(get()) }
     factory { UpdateFixedDepositUseCase(get()) }
     factory { DeleteFixedDepositUseCase(get()) }
+    factory { GetFixedDepositUseCase(get()) }
     factory { GetFixedDepositsUseCase(get()) }
 
     // FD Calculation Use Cases

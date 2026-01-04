@@ -16,11 +16,11 @@ val uiModule = module {
         FDViewModel(
             portfolioId = params[0],
             fdId = params.values.getOrNull(1) as? String,
-            fdRepository = get(),
-            authRepository = get(),
+            getFDUseCase = get(),
             createFDUseCase = get(),
             updateFDUseCase = get(),
             deleteFDUseCase = get(),
+            getCurrentAuthUserUseCase = get(),
             calculateFDStatsUseCase = get()
         )
     }

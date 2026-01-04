@@ -2,14 +2,13 @@ package com.tonyseben.finaxor.ui.fd
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.touchlab.kermit.Logger
 import com.tonyseben.finaxor.core.Result
 import com.tonyseben.finaxor.domain.model.FixedDeposit
-import com.tonyseben.finaxor.domain.repository.AuthRepository
-import com.tonyseben.finaxor.domain.repository.FixedDepositRepository
+import com.tonyseben.finaxor.domain.usecase.auth.GetCurrentAuthUserUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDStatsUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CreateFixedDepositUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.DeleteFixedDepositUseCase
+import com.tonyseben.finaxor.domain.usecase.fd.GetFixedDepositUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.UpdateFixedDepositUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,11 +18,11 @@ import kotlinx.coroutines.launch
 class FDViewModel(
     private val portfolioId: String,
     private val fdId: String?,
-    private val fdRepository: FixedDepositRepository,
-    private val authRepository: AuthRepository,
+    private val getFDUseCase: GetFixedDepositUseCase,
     private val createFDUseCase: CreateFixedDepositUseCase,
     private val updateFDUseCase: UpdateFixedDepositUseCase,
     private val deleteFDUseCase: DeleteFixedDepositUseCase,
+    private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase,
     private val calculateFDStatsUseCase: CalculateFDStatsUseCase
 ) : ViewModel() {
 
@@ -33,8 +32,6 @@ class FDViewModel(
     private var originalFormData: FDFormData? = null
 
     init {
-        Logger.d { "TEST portfolioId: $portfolioId" }
-        Logger.d { "TEST fdId: $fdId" }
         if (fdId != null && fdId != "new") {
             loadFD()
         } else {
@@ -46,9 +43,9 @@ class FDViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            when (val result = fdRepository.getById(portfolioId, fdId!!)) {
+            val params = GetFixedDepositUseCase.Params(portfolioId, fdId!!)
+            when (val result = getFDUseCase(params)) {
                 is Result.Success -> {
-                    Logger.d { "TEST 1" }
                     val fd = result.data
                     val formData = fd.toFormData()
                     originalFormData = formData
@@ -61,7 +58,6 @@ class FDViewModel(
                     loadStats(fd)
                 }
                 is Result.Error -> {
-                    Logger.d { "TEST 2" }
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         errorMessage = result.error.message
@@ -73,7 +69,6 @@ class FDViewModel(
     }
 
     private fun initCreate() {
-        Logger.d { "TEST 3" }
         _uiState.value = _uiState.value.copy(
             isEditMode = true,
             fdId = null,
@@ -137,7 +132,7 @@ class FDViewModel(
         maturityDate: Long,
         onCreated: (fdId: String) -> Unit
     ) {
-        val authUser = when (val r = authRepository.getCurrentUser()) {
+        val authUser = when (val r = getCurrentAuthUserUseCase(Unit)) {
             is Result.Success -> r.data
             else -> null
         }
@@ -221,7 +216,8 @@ class FDViewModel(
     }
 
     private suspend fun loadFDById(id: String) {
-        when (val result = fdRepository.getById(_uiState.value.portfolioId, id)) {
+        val params = GetFixedDepositUseCase.Params(_uiState.value.portfolioId, id)
+        when (val result = getFDUseCase(params)) {
             is Result.Success -> {
                 val fd = result.data
                 val formData = fd.toFormData()
