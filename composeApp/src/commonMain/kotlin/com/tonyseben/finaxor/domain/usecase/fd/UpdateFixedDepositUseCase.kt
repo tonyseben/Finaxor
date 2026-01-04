@@ -4,10 +4,12 @@ import com.tonyseben.finaxor.core.AppError
 import com.tonyseben.finaxor.core.Result
 import com.tonyseben.finaxor.domain.model.PayoutFrequency
 import com.tonyseben.finaxor.domain.repository.FixedDepositRepository
+import com.tonyseben.finaxor.domain.repository.PortfolioRepository
 import com.tonyseben.finaxor.domain.usecase.UseCase
 
 class UpdateFixedDepositUseCase(
-    private val fdRepository: FixedDepositRepository
+    private val fdRepository: FixedDepositRepository,
+    private val portfolioRepository: PortfolioRepository
 ) : UseCase<UpdateFixedDepositUseCase.Params, Unit> {
 
     data class Params(
@@ -19,11 +21,23 @@ class UpdateFixedDepositUseCase(
         val interestRate: Double,
         val startDate: Long,
         val maturityDate: Long,
-        val interestPayoutFreq: PayoutFrequency
+        val payoutFrequency: PayoutFrequency,
+        val currentUserId: String
     )
 
     override suspend fun invoke(params: Params): Result<Unit> {
-        // Same validation as create
+        // Verify user is a member of the portfolio
+        val roleResult = portfolioRepository.getMemberRole(params.portfolioId, params.currentUserId)
+        if (roleResult is Result.Error) return Result.Error(roleResult.error)
+
+        val role = (roleResult as Result.Success).data
+        if (role == null) {
+            return Result.Error(
+                AppError.PermissionError("Not a member of this portfolio")
+            )
+        }
+
+        // Validation
         if (params.bankName.isBlank()) {
             return Result.Error(AppError.ValidationError("bankName", "Bank name cannot be empty"))
         }
@@ -64,7 +78,7 @@ class UpdateFixedDepositUseCase(
             interestRate = params.interestRate,
             startDate = params.startDate,
             maturityDate = params.maturityDate,
-            interestPayoutFreq = params.interestPayoutFreq
+            payoutFrequency = params.payoutFrequency
         )
     }
 }

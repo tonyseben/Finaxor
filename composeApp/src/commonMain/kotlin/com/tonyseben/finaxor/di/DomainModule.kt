@@ -61,8 +61,8 @@ val domainModule = module {
 
     // Fixed Deposit Use Cases
     factory { CreateFixedDepositUseCase(get()) }
-    factory { UpdateFixedDepositUseCase(get()) }
-    factory { DeleteFixedDepositUseCase(get()) }
+    factory { UpdateFixedDepositUseCase(get(), get()) }
+    factory { DeleteFixedDepositUseCase(get(), get()) }
     factory { GetFixedDepositUseCase(get()) }
     factory { GetFixedDepositsUseCase(get()) }
 

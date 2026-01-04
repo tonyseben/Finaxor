@@ -30,7 +30,7 @@ class CalculateFDSummaryUseCase(
             val calcParams = CalculateFDCurrentValueUseCase.Params(fd)
             when (val result = calculateFDCurrentValueUseCase(calcParams)) {
                 is Result.Success -> currentValue += result.data
-                is Result.Error -> currentValue += fd.principalAmount
+                is Result.Error -> return Result.Error(result.error)
                 is Result.Loading -> { /* skip */ }
             }
         }

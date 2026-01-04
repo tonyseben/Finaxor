@@ -185,6 +185,19 @@ class FDViewModel(
         startDate: Long,
         maturityDate: Long
     ) {
+        val authUser = when (val r = getCurrentAuthUserUseCase(Unit)) {
+            is Result.Success -> r.data
+            else -> null
+        }
+
+        if (authUser == null) {
+            _uiState.value = _uiState.value.copy(
+                isSaving = false,
+                errorMessage = "User not authenticated"
+            )
+            return
+        }
+
         val params = UpdateFixedDepositUseCase.Params(
             portfolioId = _uiState.value.portfolioId,
             fdId = fdId,
@@ -194,7 +207,8 @@ class FDViewModel(
             interestRate = interestRate,
             startDate = startDate,
             maturityDate = maturityDate,
-            interestPayoutFreq = formData.payoutFrequency
+            payoutFrequency = formData.payoutFrequency,
+            currentUserId = authUser.uid
         )
 
         when (val result = updateFDUseCase(params)) {
@@ -248,12 +262,28 @@ class FDViewModel(
         viewModelScope.launch {
             val fdId = _uiState.value.fdId ?: return@launch
 
+            val authUser = when (val r = getCurrentAuthUserUseCase(Unit)) {
+                is Result.Success -> r.data
+                else -> null
+            }
+
+            if (authUser == null) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "User not authenticated"
+                )
+                return@launch
+            }
+
             _uiState.value = _uiState.value.copy(
                 showDeleteDialog = false,
                 isSaving = true
             )
 
-            val params = DeleteFixedDepositUseCase.Params(_uiState.value.portfolioId, fdId)
+            val params = DeleteFixedDepositUseCase.Params(
+                portfolioId = _uiState.value.portfolioId,
+                fdId = fdId,
+                currentUserId = authUser.uid
+            )
             when (val result = deleteFDUseCase(params)) {
                 is Result.Success -> {
                     _uiState.value = _uiState.value.copy(

@@ -219,4 +219,101 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .document(portfolioId)
             .delete()
     }
+
+    // Batch operations for transactional consistency
+    suspend fun createPortfolioWithMember(
+        portfolioEntity: PortfolioEntity,
+        memberEntity: PortfolioMemberEntity,
+        accessEntity: PortfolioAccessEntity,
+        userId: String
+    ): String {
+        val portfolioId = generateFirestoreId()
+
+        val portfolioRef = firestore.collection(COLLECTION_PORTFOLIOS).document(portfolioId)
+        val memberRef = portfolioRef.collection(COLLECTION_MEMBERS).document(memberEntity.userId)
+        val accessRef = firestore.collection(COLLECTION_USERS)
+            .document(userId)
+            .collection(COLLECTION_PORTFOLIO_ACCESS)
+            .document(portfolioId)
+
+        firestore.batch().apply {
+            // Create portfolio
+            set(
+                portfolioRef,
+                mapOf(
+                    "id" to portfolioId,
+                    "name" to portfolioEntity.name,
+                    "createdBy" to portfolioEntity.createdBy,
+                    "createdAt" to FieldValue.serverTimestamp,
+                    "updatedAt" to FieldValue.serverTimestamp
+                )
+            )
+
+            // Add member
+            set(
+                memberRef,
+                mapOf(
+                    "userId" to memberEntity.userId,
+                    "portfolioId" to portfolioId,
+                    "role" to memberEntity.role,
+                    "addedBy" to memberEntity.addedBy,
+                    "addedAt" to FieldValue.serverTimestamp
+                )
+            )
+
+            // Add portfolio access
+            set(
+                accessRef,
+                mapOf(
+                    "portfolioId" to portfolioId,
+                    "portfolioName" to accessEntity.portfolioName,
+                    "role" to accessEntity.role,
+                    "addedAt" to FieldValue.serverTimestamp
+                )
+            )
+        }.commit()
+
+        return portfolioId
+    }
+
+    suspend fun addMemberWithAccess(
+        portfolioId: String,
+        memberEntity: PortfolioMemberEntity,
+        accessEntity: PortfolioAccessEntity,
+        userId: String
+    ) {
+        val memberRef = firestore.collection(COLLECTION_PORTFOLIOS)
+            .document(portfolioId)
+            .collection(COLLECTION_MEMBERS)
+            .document(memberEntity.userId)
+        val accessRef = firestore.collection(COLLECTION_USERS)
+            .document(userId)
+            .collection(COLLECTION_PORTFOLIO_ACCESS)
+            .document(portfolioId)
+
+        firestore.batch().apply {
+            // Add member
+            set(
+                memberRef,
+                mapOf(
+                    "userId" to memberEntity.userId,
+                    "portfolioId" to portfolioId,
+                    "role" to memberEntity.role,
+                    "addedBy" to memberEntity.addedBy,
+                    "addedAt" to FieldValue.serverTimestamp
+                )
+            )
+
+            // Add portfolio access
+            set(
+                accessRef,
+                mapOf(
+                    "portfolioId" to accessEntity.portfolioId,
+                    "portfolioName" to accessEntity.portfolioName,
+                    "role" to accessEntity.role,
+                    "addedAt" to FieldValue.serverTimestamp
+                )
+            )
+        }.commit()
+    }
 }

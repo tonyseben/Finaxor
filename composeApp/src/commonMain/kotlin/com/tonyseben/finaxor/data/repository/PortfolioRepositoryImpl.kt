@@ -27,30 +27,26 @@ class PortfolioRepositoryImpl(
 
     override suspend fun createPortfolio(name: String, userId: String): Result<Portfolio> {
         return try {
-            // Create portfolio
             val portfolioEntity = PortfolioEntity(
                 name = name,
                 createdBy = userId
             )
-
-            val portfolioId = portfolioDataSource.createPortfolio(portfolioEntity)
-
-            // Add creator as owner member
             val memberEntity = PortfolioMemberEntity(
                 userId = userId,
-                portfolioId = portfolioId,
+                portfolioId = "", // Will be set by batch operation
                 role = "owner",
                 addedBy = userId
             )
-            portfolioDataSource.addMember(portfolioId, memberEntity)
-
-            // Add to user's portfolio access
             val accessEntity = PortfolioAccessEntity(
-                portfolioId = portfolioId,
+                portfolioId = "", // Will be set by batch operation
                 portfolioName = name,
                 role = "owner"
             )
-            portfolioDataSource.addPortfolioAccess(userId, accessEntity)
+
+            // Atomic batch operation: creates portfolio, member, and access together
+            val portfolioId = portfolioDataSource.createPortfolioWithMember(
+                portfolioEntity, memberEntity, accessEntity, userId
+            )
 
             Result.Success(portfolioEntity.copy(id = portfolioId).toDomain())
         } catch (e: Exception) {
@@ -111,24 +107,23 @@ class PortfolioRepositoryImpl(
         addedBy: String
     ): Result<Unit> {
         return try {
+            // Get portfolio name first (needed for access entry)
+            val portfolio = portfolioDataSource.getPortfolio(portfolioId)
+
             val memberEntity = PortfolioMemberEntity(
                 userId = userId,
                 portfolioId = portfolioId,
                 role = role.toRoleString(),
                 addedBy = addedBy
             )
-
-            portfolioDataSource.addMember(portfolioId, memberEntity)
-
-            // Add to user's portfolio access
-            val portfolio = portfolioDataSource.getPortfolio(portfolioId)
             val accessEntity = PortfolioAccessEntity(
                 portfolioId = portfolioId,
                 portfolioName = portfolio.name,
                 role = role.toRoleString()
             )
 
-            portfolioDataSource.addPortfolioAccess(userId, accessEntity)
+            // Atomic batch operation: adds member and access together
+            portfolioDataSource.addMemberWithAccess(portfolioId, memberEntity, accessEntity, userId)
 
             Result.Success(Unit)
         } catch (e: Exception) {

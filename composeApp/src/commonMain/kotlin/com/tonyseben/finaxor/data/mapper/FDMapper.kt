@@ -14,7 +14,8 @@ fun FixedDepositEntity.toDomain(): FixedDeposit {
         interestRate = interestRate,
         startDate = startDate,
         maturityDate = maturityDate,
-        payoutFrequency = payoutFrequency.toPayoutFrequency() ?: PayoutFrequency.YEARLY,
+        payoutFrequency = payoutFrequency.toPayoutFrequency()
+            ?: throw IllegalStateException("Invalid payout frequency: $payoutFrequency"),
         createdAt = createdAt,
         updatedAt = updatedAt,
         createdBy = createdBy

@@ -19,7 +19,7 @@ interface FixedDepositRepository {
         interestRate: Double,
         startDate: Long,
         maturityDate: Long,
-        interestPayoutFreq: PayoutFrequency,
+        payoutFrequency: PayoutFrequency,
         createdBy: String
     ): Result<String>
 
@@ -32,7 +32,7 @@ interface FixedDepositRepository {
         interestRate: Double,
         startDate: Long,
         maturityDate: Long,
-        interestPayoutFreq: PayoutFrequency
+        payoutFrequency: PayoutFrequency
     ): Result<Unit>
 
     suspend fun delete(portfolioId: String, fdId: String): Result<Unit>

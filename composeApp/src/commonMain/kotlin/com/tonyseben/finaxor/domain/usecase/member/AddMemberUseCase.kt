@@ -16,10 +16,27 @@ class AddMemberUseCase(
         val portfolioId: String,
         val userEmail: String,
         val role: PortfolioRole,
-        val addedBy: String
+        val addedBy: String,
+        val currentUserId: String
     )
 
     override suspend fun invoke(params: Params): Result<Unit> {
+        // Verify caller is OWNER
+        val roleResult = portfolioRepository.getMemberRole(params.portfolioId, params.currentUserId)
+        if (roleResult is Result.Error) return Result.Error(roleResult.error)
+
+        val callerRole = (roleResult as Result.Success).data
+        if (callerRole == null) {
+            return Result.Error(
+                AppError.PermissionError("Not a member of this portfolio")
+            )
+        }
+        if (callerRole != PortfolioRole.OWNER) {
+            return Result.Error(
+                AppError.PermissionError("Only portfolio owners can add members")
+            )
+        }
+
         // Validate email
         if (!params.userEmail.contains("@")) {
             return Result.Error(

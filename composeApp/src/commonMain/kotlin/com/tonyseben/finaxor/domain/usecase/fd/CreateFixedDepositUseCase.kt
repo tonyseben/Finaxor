@@ -72,7 +72,7 @@ class CreateFixedDepositUseCase(
             interestRate = params.interestRate,
             startDate = params.startDate,
             maturityDate = params.maturityDate,
-            interestPayoutFreq = params.interestPayoutFreq,
+            payoutFrequency = params.interestPayoutFreq,
             createdBy = params.createdBy
         )
     }
