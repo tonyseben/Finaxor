@@ -40,10 +40,11 @@ class FDViewModel(
     }
 
     private fun loadFD() {
+        val id = fdId ?: return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            val params = GetFixedDepositUseCase.Params(portfolioId, fdId!!)
+            val params = GetFixedDepositUseCase.Params(portfolioId, id)
             when (val result = getFDUseCase(params)) {
                 is Result.Success -> {
                     val fd = result.data
@@ -107,14 +108,43 @@ class FDViewModel(
 
     fun save(onCreated: (fdId: String) -> Unit = {}) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isSaving = true)
-
             val state = _uiState.value
             val formData = state.formData
-            val principalAmount = formData.principalAmount.toDoubleOrNull() ?: 0.0
-            val interestRate = formData.interestRate.toDoubleOrNull() ?: 0.0
-            val startDate = formData.startDate ?: 0L
-            val maturityDate = formData.maturityDate ?: 0L
+
+            // Validate form data before proceeding
+            val principalAmount = formData.principalAmount.toDoubleOrNull()
+            if (principalAmount == null) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Please enter a valid principal amount"
+                )
+                return@launch
+            }
+
+            val interestRate = formData.interestRate.toDoubleOrNull()
+            if (interestRate == null) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Please enter a valid interest rate"
+                )
+                return@launch
+            }
+
+            val startDate = formData.startDate
+            if (startDate == null) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Please select a start date"
+                )
+                return@launch
+            }
+
+            val maturityDate = formData.maturityDate
+            if (maturityDate == null) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Please select a maturity date"
+                )
+                return@launch
+            }
+
+            _uiState.value = _uiState.value.copy(isSaving = true)
 
             if (state.fdId == null) {
                 createFD(formData, principalAmount, interestRate, startDate, maturityDate, onCreated)

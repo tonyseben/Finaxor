@@ -163,12 +163,9 @@ class PortfolioRepositoryImpl(
         return portfolioDataSource.getMembers(portfolioId)
             .map { members ->
                 try {
-                    val users = members.mapNotNull { member ->
-                        try {
-                            userDataSource.getUser(member.userId).toDomain()
-                        } catch (e: Exception) {
-                            null
-                        }
+                    val users = members.map { member ->
+                        // Don't silently filter out failed lookups - propagate errors
+                        userDataSource.getUser(member.userId).toDomain()
                     }
                     Result.Success(users)
                 } catch (e: Exception) {
@@ -194,11 +191,8 @@ class PortfolioRepositoryImpl(
 
     override suspend fun isLastOwner(portfolioId: String, userId: String): Result<Boolean> {
         return try {
-            val ownerCount = portfolioDataSource.getOwnerCount(portfolioId)
-            val member = portfolioDataSource.getMember(portfolioId, userId)
-            val isOwner = member.role == "owner"
-
-            Result.Success(ownerCount == 1 && isOwner)
+            // Uses single read to avoid race condition
+            Result.Success(portfolioDataSource.isLastOwner(portfolioId, userId))
         } catch (e: Exception) {
             Result.Error(e.toAppError())
         }

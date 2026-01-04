@@ -181,6 +181,23 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
         }
     }
 
+    /**
+     * Atomically checks if the given user is the last owner of the portfolio.
+     * Uses a single read to avoid race conditions.
+     */
+    suspend fun isLastOwner(portfolioId: String, userId: String): Boolean {
+        val snapshot = firestore
+            .collection(COLLECTION_PORTFOLIOS)
+            .document(portfolioId)
+            .collection(COLLECTION_MEMBERS)
+            .get()
+
+        val members = snapshot.documents.map { it.toPortfolioMemberEntity() }
+        val owners = members.filter { it.role == "owner" }
+
+        return owners.size == 1 && owners.first().userId == userId
+    }
+
     // Portfolio access operations
     suspend fun addPortfolioAccess(userId: String, entity: PortfolioAccessEntity) {
         firestore
