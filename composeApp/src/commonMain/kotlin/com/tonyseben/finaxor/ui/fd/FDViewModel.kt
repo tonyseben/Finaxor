@@ -2,10 +2,11 @@ package com.tonyseben.finaxor.ui.fd
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import com.tonyseben.finaxor.core.Result
 import com.tonyseben.finaxor.domain.model.FixedDeposit
+import com.tonyseben.finaxor.domain.repository.AuthRepository
 import com.tonyseben.finaxor.domain.repository.FixedDepositRepository
-import com.tonyseben.finaxor.domain.usecase.auth.GetCurrentUserUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDStatsUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.CreateFixedDepositUseCase
 import com.tonyseben.finaxor.domain.usecase.fd.DeleteFixedDepositUseCase
@@ -19,10 +20,10 @@ class FDViewModel(
     private val portfolioId: String,
     private val fdId: String?,
     private val fdRepository: FixedDepositRepository,
+    private val authRepository: AuthRepository,
     private val createFDUseCase: CreateFixedDepositUseCase,
     private val updateFDUseCase: UpdateFixedDepositUseCase,
     private val deleteFDUseCase: DeleteFixedDepositUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val calculateFDStatsUseCase: CalculateFDStatsUseCase
 ) : ViewModel() {
 
@@ -32,6 +33,8 @@ class FDViewModel(
     private var originalFormData: FDFormData? = null
 
     init {
+        Logger.d { "TEST portfolioId: $portfolioId" }
+        Logger.d { "TEST fdId: $fdId" }
         if (fdId != null && fdId != "new") {
             loadFD()
         } else {
@@ -45,6 +48,7 @@ class FDViewModel(
 
             when (val result = fdRepository.getById(portfolioId, fdId!!)) {
                 is Result.Success -> {
+                    Logger.d { "TEST 1" }
                     val fd = result.data
                     val formData = fd.toFormData()
                     originalFormData = formData
@@ -57,6 +61,7 @@ class FDViewModel(
                     loadStats(fd)
                 }
                 is Result.Error -> {
+                    Logger.d { "TEST 2" }
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         errorMessage = result.error.message
@@ -68,6 +73,7 @@ class FDViewModel(
     }
 
     private fun initCreate() {
+        Logger.d { "TEST 3" }
         _uiState.value = _uiState.value.copy(
             isEditMode = true,
             fdId = null,
@@ -131,12 +137,12 @@ class FDViewModel(
         maturityDate: Long,
         onCreated: (fdId: String) -> Unit
     ) {
-        val currentUser = when (val r = getCurrentUserUseCase(Unit)) {
+        val authUser = when (val r = authRepository.getCurrentUser()) {
             is Result.Success -> r.data
             else -> null
         }
 
-        if (currentUser == null) {
+        if (authUser == null) {
             _uiState.value = _uiState.value.copy(
                 isSaving = false,
                 errorMessage = "User not authenticated"
@@ -153,7 +159,7 @@ class FDViewModel(
             startDate = startDate,
             maturityDate = maturityDate,
             interestPayoutFreq = formData.payoutFrequency,
-            createdBy = currentUser.id
+            createdBy = authUser.uid
         )
 
         when (val result = createFDUseCase(params)) {

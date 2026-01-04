@@ -3,10 +3,13 @@ package com.tonyseben.finaxor.core
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 // ============================================
 // UTILITY FUNCTIONS
 // ============================================
+
+fun currentTimeMillis(): Long = Clock.System.now().toEpochMilliseconds()
 
 fun formatCurrency(amount: Double): String {
     val rounded = amount.toLong()

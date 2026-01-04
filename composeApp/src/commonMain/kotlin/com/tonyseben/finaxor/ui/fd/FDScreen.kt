@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import co.touchlab.kermit.Logger
 import com.tonyseben.finaxor.ui.components.BannerType
 import com.tonyseben.finaxor.ui.components.MessageBanner
 import org.koin.compose.viewmodel.koinViewModel
@@ -48,6 +49,7 @@ fun FDScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showMenu by remember { mutableStateOf(false) }
+    Logger.d { "TEST isEditMode: ${uiState.isEditMode}" }
 
     Scaffold(
         modifier = modifier,

@@ -2,6 +2,7 @@ package com.tonyseben.finaxor.data.repository
 
 import com.tonyseben.finaxor.core.AppError
 import com.tonyseben.finaxor.core.Result
+import com.tonyseben.finaxor.core.currentTimeMillis
 import com.tonyseben.finaxor.core.toAppError
 import com.tonyseben.finaxor.data.entity.FixedDepositEntity
 import com.tonyseben.finaxor.data.mapper.toDomain
@@ -31,8 +32,6 @@ class FixedDepositRepositoryImpl(
         createdBy: String
     ): Result<String> {
         return try {
-            val now = Clock.System.now().toEpochMilliseconds()
-
             val entity = FixedDepositEntity(
                 portfolioId = portfolioId,
                 bankName = bankName,
@@ -42,8 +41,6 @@ class FixedDepositRepositoryImpl(
                 startDate = startDate,
                 maturityDate = maturityDate,
                 payoutFrequency = payoutFrequency.toFrequencyString(),
-                createdAt = now,
-                updatedAt = now,
                 createdBy = createdBy
             )
 
@@ -66,20 +63,19 @@ class FixedDepositRepositoryImpl(
         payoutFrequency: PayoutFrequency
     ): Result<Unit> {
         return try {
-            val now = Clock.System.now().toEpochMilliseconds()
-
-            val updates = mapOf(
-                "bankName" to bankName,
-                "accountNumber" to accountNumber,
-                "principalAmount" to principalAmount,
-                "interestRate" to interestRate,
-                "startDate" to startDate,
-                "maturityDate" to maturityDate,
-                "payoutFrequency" to payoutFrequency.toFrequencyString(),
-                "updatedAt" to now
+            val entity = FixedDepositEntity(
+                id = fdId,
+                portfolioId = portfolioId,
+                bankName = bankName,
+                accountNumber = accountNumber,
+                principalAmount = principalAmount,
+                interestRate = interestRate,
+                startDate = startDate,
+                maturityDate = maturityDate,
+                payoutFrequency = payoutFrequency.toFrequencyString()
             )
 
-            dataSource.update(portfolioId, fdId, updates)
+            dataSource.update(portfolioId, fdId, entity)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e.toAppError())
@@ -117,7 +113,7 @@ class FixedDepositRepositoryImpl(
     override fun getActiveByPortfolio(portfolioId: String): Flow<Result<List<FixedDeposit>>> {
         return dataSource.getByPortfolio(portfolioId)
             .map { entities ->
-                val now = Clock.System.now().toEpochMilliseconds()
+                val now = currentTimeMillis()
                 val activeFDs = entities.toDomain().filter { fd ->
                     now >= fd.startDate && now < fd.maturityDate
                 }
@@ -131,7 +127,7 @@ class FixedDepositRepositoryImpl(
     override fun getMaturedByPortfolio(portfolioId: String): Flow<Result<List<FixedDeposit>>> {
         return dataSource.getByPortfolio(portfolioId)
             .map { entities ->
-                val now = Clock.System.now().toEpochMilliseconds()
+                val now = currentTimeMillis()
                 val maturedFDs = entities.toDomain().filter { fd ->
                     now >= fd.maturityDate
                 }

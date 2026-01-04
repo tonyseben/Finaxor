@@ -1,6 +1,7 @@
 package com.tonyseben.finaxor.domain.usecase.fd
 
 import com.tonyseben.finaxor.core.Result
+import com.tonyseben.finaxor.core.currentTimeMillis
 import com.tonyseben.finaxor.core.toAppError
 import com.tonyseben.finaxor.domain.model.FDStatus
 import com.tonyseben.finaxor.domain.model.FixedDeposit
@@ -14,7 +15,7 @@ class GetFDStatusUseCase : UseCase<GetFDStatusUseCase.Params, FDStatus> {
 
     data class Params(
         val fixedDeposit: FixedDeposit,
-        val currentTimeMillis: Long = Clock.System.now().toEpochMilliseconds()
+        val currentTimeMillis: Long = currentTimeMillis()
     )
 
     override suspend fun invoke(params: Params): Result<FDStatus> {

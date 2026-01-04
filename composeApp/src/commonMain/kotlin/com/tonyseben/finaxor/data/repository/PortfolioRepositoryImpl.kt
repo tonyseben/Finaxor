@@ -19,7 +19,6 @@ import com.tonyseben.finaxor.domain.repository.PortfolioRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import kotlin.time.Clock
 
 class PortfolioRepositoryImpl(
     private val portfolioDataSource: PortfolioRemoteDataSource,
@@ -28,14 +27,10 @@ class PortfolioRepositoryImpl(
 
     override suspend fun createPortfolio(name: String, userId: String): Result<Portfolio> {
         return try {
-            val now = Clock.System.now().toEpochMilliseconds()
-
             // Create portfolio
             val portfolioEntity = PortfolioEntity(
                 name = name,
-                createdBy = userId,
-                createdAt = now,
-                updatedAt = now
+                createdBy = userId
             )
 
             val portfolioId = portfolioDataSource.createPortfolio(portfolioEntity)
@@ -45,8 +40,7 @@ class PortfolioRepositoryImpl(
                 userId = userId,
                 portfolioId = portfolioId,
                 role = "owner",
-                addedBy = userId,
-                addedAt = now
+                addedBy = userId
             )
             portfolioDataSource.addMember(portfolioId, memberEntity)
 
@@ -54,8 +48,7 @@ class PortfolioRepositoryImpl(
             val accessEntity = PortfolioAccessEntity(
                 portfolioId = portfolioId,
                 portfolioName = name,
-                role = "owner",
-                addedAt = now
+                role = "owner"
             )
             portfolioDataSource.addPortfolioAccess(userId, accessEntity)
 
@@ -76,14 +69,7 @@ class PortfolioRepositoryImpl(
 
     override suspend fun updatePortfolio(portfolioId: String, name: String): Result<Unit> {
         return try {
-            val now = Clock.System.now().toEpochMilliseconds()
-            val updates = mapOf(
-                "name" to name,
-                "updatedAt" to now
-            )
-
-            portfolioDataSource.updatePortfolio(portfolioId, updates)
-
+            portfolioDataSource.updatePortfolio(portfolioId, name)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e.toAppError())
@@ -125,14 +111,11 @@ class PortfolioRepositoryImpl(
         addedBy: String
     ): Result<Unit> {
         return try {
-            val now = Clock.System.now().toEpochMilliseconds()
-
             val memberEntity = PortfolioMemberEntity(
                 userId = userId,
                 portfolioId = portfolioId,
                 role = role.toRoleString(),
-                addedBy = addedBy,
-                addedAt = now
+                addedBy = addedBy
             )
 
             portfolioDataSource.addMember(portfolioId, memberEntity)
@@ -142,8 +125,7 @@ class PortfolioRepositoryImpl(
             val accessEntity = PortfolioAccessEntity(
                 portfolioId = portfolioId,
                 portfolioName = portfolio.name,
-                role = role.toRoleString(),
-                addedAt = now
+                role = role.toRoleString()
             )
 
             portfolioDataSource.addPortfolioAccess(userId, accessEntity)

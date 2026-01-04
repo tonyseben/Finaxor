@@ -79,11 +79,16 @@ class PortfolioRemoteDataSource(private val firestore: FirebaseFirestore) {
             .toPortfolioEntity()
     }
 
-    suspend fun updatePortfolio(portfolioId: String, updates: Map<String, Any>) {
+    suspend fun updatePortfolio(portfolioId: String, name: String) {
         firestore
             .collection(COLLECTION_PORTFOLIOS)
             .document(portfolioId)
-            .update(updates)
+            .update(
+                mapOf(
+                    "name" to name,
+                    "updatedAt" to FieldValue.serverTimestamp
+                )
+            )
     }
 
     suspend fun deletePortfolio(portfolioId: String) {

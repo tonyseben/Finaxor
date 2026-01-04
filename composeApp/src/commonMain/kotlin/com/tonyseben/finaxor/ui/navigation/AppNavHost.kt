@@ -62,7 +62,7 @@ fun AppNavHost(
                     onLogout = onLogout,
                     onCreateClick = { homeViewModel.showCreateSheet() },
                     onPortfolioClick = { portfolioId ->
-                        navController.navigate(Route.PortfolioDetail.createRoute(portfolioId))
+                        navController.navigate(Route.Portfolio.createRoute(portfolioId))
                     }
                 )
 
@@ -75,7 +75,7 @@ fun AppNavHost(
                             isCreating = homeUiState.isCreating,
                             onCreateClick = { name ->
                                 homeViewModel.createPortfolio(name) { portfolioId ->
-                                    navController.navigate(Route.PortfolioDetail.createRoute(portfolioId))
+                                    navController.navigate(Route.Portfolio.createRoute(portfolioId))
                                 }
                             }
                         )
@@ -84,7 +84,7 @@ fun AppNavHost(
             }
         }
 
-        composable(Route.PortfolioDetail.route) { backStackEntry ->
+        composable(Route.Portfolio.route) { backStackEntry ->
             val portfolioId = backStackEntry.arguments?.getString("portfolioId") ?: return@composable
             PortfolioScreen(
                 portfolioId = portfolioId,

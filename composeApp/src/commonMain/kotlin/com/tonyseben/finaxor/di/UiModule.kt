@@ -4,6 +4,7 @@ import com.tonyseben.finaxor.ui.auth.AuthViewModel
 import com.tonyseben.finaxor.ui.fd.FDViewModel
 import com.tonyseben.finaxor.ui.home.HomeViewModel
 import com.tonyseben.finaxor.ui.portfolio.PortfolioViewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -11,5 +12,16 @@ val uiModule = module {
     viewModelOf(::AuthViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::PortfolioViewModel)
-    viewModelOf(::FDViewModel)
+    viewModel { params ->
+        FDViewModel(
+            portfolioId = params[0],
+            fdId = params.values.getOrNull(1) as? String,
+            fdRepository = get(),
+            authRepository = get(),
+            createFDUseCase = get(),
+            updateFDUseCase = get(),
+            deleteFDUseCase = get(),
+            calculateFDStatsUseCase = get()
+        )
+    }
 }

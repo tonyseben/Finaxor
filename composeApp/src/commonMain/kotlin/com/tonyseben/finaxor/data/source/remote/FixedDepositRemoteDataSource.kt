@@ -1,8 +1,12 @@
 package com.tonyseben.finaxor.data.source.remote
 
 import com.tonyseben.finaxor.core.generateFirestoreId
+import com.tonyseben.finaxor.core.toEpochMillis
 import com.tonyseben.finaxor.data.entity.FixedDepositEntity
+import dev.gitlive.firebase.firestore.DocumentSnapshot
+import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.FirebaseFirestore
+import dev.gitlive.firebase.firestore.Timestamp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -17,6 +21,23 @@ class FixedDepositRemoteDataSource(private val firestore: FirebaseFirestore) {
         const val COLLECTION_FDS = "fixedDeposits"
     }
 
+    private fun DocumentSnapshot.toFDEntity(): FixedDepositEntity {
+        return FixedDepositEntity(
+            id = get<String?>("id") ?: id,
+            portfolioId = get<String?>("portfolioId") ?: "",
+            bankName = get<String?>("bankName") ?: "",
+            accountNumber = get<String?>("accountNumber") ?: "",
+            principalAmount = get<Double?>("principalAmount") ?: 0.0,
+            interestRate = get<Double?>("interestRate") ?: 0.0,
+            startDate = get<Long?>("startDate") ?: 0L,
+            maturityDate = get<Long?>("maturityDate") ?: 0L,
+            payoutFrequency = get<String?>("payoutFrequency") ?: "",
+            createdAt = get<Timestamp?>("createdAt")?.toEpochMillis() ?: 0L,
+            updatedAt = get<Timestamp?>("updatedAt")?.toEpochMillis() ?: 0L,
+            createdBy = get<String?>("createdBy") ?: ""
+        )
+    }
+
     suspend fun create(portfolioId: String, entity: FixedDepositEntity): String {
         val id = generateFirestoreId()
         val ref = firestore
@@ -25,22 +46,43 @@ class FixedDepositRemoteDataSource(private val firestore: FirebaseFirestore) {
             .collection(COLLECTION_FDS)
             .document(id)
 
-        val fdWithId = entity.copy(
-            id = ref.id,
-            portfolioId = portfolioId
+        val data = mapOf(
+            "id" to ref.id,
+            "portfolioId" to portfolioId,
+            "bankName" to entity.bankName,
+            "accountNumber" to entity.accountNumber,
+            "principalAmount" to entity.principalAmount,
+            "interestRate" to entity.interestRate,
+            "startDate" to entity.startDate,
+            "maturityDate" to entity.maturityDate,
+            "payoutFrequency" to entity.payoutFrequency,
+            "createdBy" to entity.createdBy,
+            "createdAt" to FieldValue.serverTimestamp,
+            "updatedAt" to FieldValue.serverTimestamp
         )
 
-        ref.set(fdWithId)
+        ref.set(data)
         return ref.id
     }
 
-    suspend fun update(portfolioId: String, fdId: String, updates: Map<String, Any>) {
+    suspend fun update(portfolioId: String, fdId: String, entity: FixedDepositEntity) {
+        val data = mapOf(
+            "bankName" to entity.bankName,
+            "accountNumber" to entity.accountNumber,
+            "principalAmount" to entity.principalAmount,
+            "interestRate" to entity.interestRate,
+            "startDate" to entity.startDate,
+            "maturityDate" to entity.maturityDate,
+            "payoutFrequency" to entity.payoutFrequency,
+            "updatedAt" to FieldValue.serverTimestamp
+        )
+
         firestore
             .collection(COLLECTION_PORTFOLIOS)
             .document(portfolioId)
             .collection(COLLECTION_FDS)
             .document(fdId)
-            .update(updates)
+            .update(data)
     }
 
     suspend fun delete(portfolioId: String, fdId: String) {
@@ -59,7 +101,7 @@ class FixedDepositRemoteDataSource(private val firestore: FirebaseFirestore) {
             .collection(COLLECTION_FDS)
             .document(fdId)
             .get()
-            .data()
+            .toFDEntity()
     }
 
     fun getByPortfolio(portfolioId: String): Flow<List<FixedDepositEntity>> {
@@ -70,7 +112,7 @@ class FixedDepositRemoteDataSource(private val firestore: FirebaseFirestore) {
             .snapshots
             .map { snapshot ->
                 snapshot.documents
-                    .map { it.data<FixedDepositEntity>() }
+                    .map { it.toFDEntity() }
                     .sortedByDescending { it.createdAt }
             }
     }
@@ -82,6 +124,6 @@ class FixedDepositRemoteDataSource(private val firestore: FirebaseFirestore) {
             .collection(COLLECTION_FDS)
             .get()
 
-        return snapshot.documents.map { it.data() }
+        return snapshot.documents.map { it.toFDEntity() }
     }
 }
