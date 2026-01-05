@@ -15,4 +15,9 @@ sealed class Route(val route: String) {
         fun createRoute(portfolioId: String, fdId: String?) =
             "portfolio/$portfolioId/fd/${fdId ?: "new"}"
     }
+
+    data object AssetList : Route("portfolio/{portfolioId}/assets/{assetType}") {
+        fun createRoute(portfolioId: String, assetType: String) =
+            "portfolio/$portfolioId/assets/$assetType"
+    }
 }

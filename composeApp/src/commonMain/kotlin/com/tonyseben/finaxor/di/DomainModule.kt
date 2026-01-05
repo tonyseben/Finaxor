@@ -25,6 +25,7 @@ import com.tonyseben.finaxor.domain.usecase.member.AddMemberUseCase
 import com.tonyseben.finaxor.domain.usecase.member.GetPortfolioMembersUseCase
 import com.tonyseben.finaxor.domain.usecase.member.RemoveMemberUseCase
 import com.tonyseben.finaxor.domain.usecase.member.UpdateMemberRoleUseCase
+import com.tonyseben.finaxor.domain.usecase.asset.GetAssetListDataUseCase
 import com.tonyseben.finaxor.domain.usecase.portfolio.CreatePortfolioUseCase
 import com.tonyseben.finaxor.domain.usecase.portfolio.DeletePortfolioUseCase
 import com.tonyseben.finaxor.domain.usecase.portfolio.GetPortfolioSummaryUseCase
@@ -44,6 +45,9 @@ val domainModule = module {
     // Asset Strategies
     factory<AssetStrategy> { FixedDepositStrategy(get(), get()) }
     factory { listOf(get<AssetStrategy>()) }
+
+    // Asset Use Cases
+    factory { GetAssetListDataUseCase(get()) }
 
     // Portfolio Use Cases
     factory { CreatePortfolioUseCase(get()) }

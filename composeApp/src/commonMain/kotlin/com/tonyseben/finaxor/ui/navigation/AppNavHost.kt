@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.tonyseben.finaxor.domain.model.AuthUser
+import com.tonyseben.finaxor.ui.assetlist.AssetListScreen
 import com.tonyseben.finaxor.ui.auth.GoogleSignInLauncher
 import com.tonyseben.finaxor.ui.auth.LoginScreen
 import com.tonyseben.finaxor.ui.fd.FDScreen
@@ -92,6 +93,29 @@ fun AppNavHost(
                 onAddAsset = { assetType ->
                     if (assetType == "FIXED_DEPOSIT") {
                         navController.navigate(Route.FD.createRoute(portfolioId, null))
+                    }
+                },
+                onAssetTypeClick = { assetType ->
+                    navController.navigate(Route.AssetList.createRoute(portfolioId, assetType))
+                }
+            )
+        }
+
+        composable(Route.AssetList.route) { backStackEntry ->
+            val portfolioId = backStackEntry.arguments?.getString("portfolioId") ?: return@composable
+            val assetType = backStackEntry.arguments?.getString("assetType") ?: return@composable
+            AssetListScreen(
+                portfolioId = portfolioId,
+                assetType = assetType,
+                onBackClick = { navController.popBackStack() },
+                onItemClick = { assetId ->
+                    when (assetType) {
+                        "FIXED_DEPOSIT" -> navController.navigate(Route.FD.createRoute(portfolioId, assetId))
+                    }
+                },
+                onAddClick = {
+                    when (assetType) {
+                        "FIXED_DEPOSIT" -> navController.navigate(Route.FD.createRoute(portfolioId, null))
                     }
                 }
             )

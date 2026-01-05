@@ -1,5 +1,6 @@
 package com.tonyseben.finaxor.di
 
+import com.tonyseben.finaxor.ui.assetlist.AssetListViewModel
 import com.tonyseben.finaxor.ui.auth.AuthViewModel
 import com.tonyseben.finaxor.ui.fd.FDViewModel
 import com.tonyseben.finaxor.ui.home.HomeViewModel
@@ -12,6 +13,13 @@ val uiModule = module {
     viewModelOf(::AuthViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::PortfolioViewModel)
+    viewModel { params ->
+        AssetListViewModel(
+            portfolioId = params[0],
+            assetType = params[1],
+            getAssetListDataUseCase = get()
+        )
+    }
     viewModel { params ->
         FDViewModel(
             portfolioId = params[0],

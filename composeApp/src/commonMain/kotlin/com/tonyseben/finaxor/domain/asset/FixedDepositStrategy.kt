@@ -1,8 +1,16 @@
 package com.tonyseben.finaxor.domain.asset
 
 import com.tonyseben.finaxor.core.Result
+import com.tonyseben.finaxor.core.currentTimeMillis
+import com.tonyseben.finaxor.core.formatCurrency
+import com.tonyseben.finaxor.domain.calculator.calculateCurrentValue
+import com.tonyseben.finaxor.domain.model.AssetListItem
+import com.tonyseben.finaxor.domain.model.AssetListStats
 import com.tonyseben.finaxor.domain.model.AssetSummary
+import com.tonyseben.finaxor.domain.model.FDListItem
 import com.tonyseben.finaxor.domain.model.FixedDeposit
+import com.tonyseben.finaxor.domain.model.StatEntry
+import com.tonyseben.finaxor.domain.model.StatValueColor
 import com.tonyseben.finaxor.domain.repository.FixedDepositRepository
 import com.tonyseben.finaxor.domain.usecase.fd.CalculateFDSummaryUseCase
 import kotlinx.coroutines.flow.Flow
@@ -49,5 +57,51 @@ class FixedDepositStrategy(
             is Result.Error -> result
             is Result.Loading -> Result.Loading
         }
+    }
+
+    override fun toListItems(assets: List<Any>): List<AssetListItem> {
+        val currentTime = currentTimeMillis()
+        return assets.filterIsInstance<FixedDeposit>().map { fd ->
+            val currentValue = fd.calculateCurrentValue(currentTime)
+            val returnsPercent = if (fd.principalAmount > 0) {
+                ((currentValue - fd.principalAmount) / fd.principalAmount) * 100
+            } else 0.0
+
+            FDListItem(
+                id = fd.id,
+                title = fd.bankName,
+                subtitle = fd.accountNumber,
+                primaryValue = fd.principalAmount,
+                secondaryValue = currentValue,
+                returnsPercent = returnsPercent
+            )
+        }
+    }
+
+    override fun calculateListStats(assets: List<Any>): AssetListStats {
+        val fds = assets.filterIsInstance<FixedDeposit>()
+        val count = fds.size
+        val currentTime = currentTimeMillis()
+
+        val totalInvested = fds.sumOf { it.principalAmount }
+        val totalCurrentValue = fds.sumOf { it.calculateCurrentValue(currentTime) }
+        val returnsPercent = if (totalInvested > 0) {
+            ((totalCurrentValue - totalInvested) / totalInvested) * 100
+        } else 0.0
+
+        val returnsFormatted = "${if (returnsPercent >= 0) "+" else ""}${"%.2f".format(returnsPercent)}%"
+
+        return AssetListStats(
+            headline = "$count Fixed Deposit${if (count != 1) "s" else ""}",
+            entries = listOf(
+                StatEntry(label = "Total Invested", value = formatCurrency(totalInvested)),
+                StatEntry(label = "Current Value", value = formatCurrency(totalCurrentValue)),
+                StatEntry(
+                    label = "Returns",
+                    value = returnsFormatted,
+                    valueColor = if (returnsPercent >= 0) StatValueColor.POSITIVE else StatValueColor.NEGATIVE
+                )
+            )
+        )
     }
 }
